@@ -10,7 +10,7 @@ CELL_COLOR_VALUE = 100
 MAX_COLOR_VARIANCE = 0.025
 
 class Interface:
-    def __init__(self, maze_height, maze_width):
+    def __init__(self, maze_height, maze_width , real_maze):
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
         # Calcula tamanho da célula baseado no tamanho do labirinto e da tela
@@ -19,6 +19,7 @@ class Interface:
         # Carrega e escala a imagem do mouse
         self.mouse_image = pygame.transform.smoothscale(pygame.image.load('assets/mouse.png'), (self.cell_size*0.8, self.cell_size*0.8))
 
+        self.real_maze = real_maze
         self.maze_width = maze_width
         self.maze_height = maze_height
         maze_size = (maze_width * self.cell_size, maze_height * self.cell_size)
@@ -114,11 +115,11 @@ class Interface:
         for row in range(self.maze_height):
             for col in range(self.maze_width):
                 # Controle de cor com base no tipo e peso da celula: 
-                # Parede
-                if is_wall((row, col), known_maze):
-                    cell_color = pygame.Color(50, 50, 50)  # Cinza escuro
+                known_wall = is_wall((row, col), known_maze)
+                if known_wall:
+                    cell_color = pygame.Color(0, 0, 0)  # Preto para paredes
                 elif (row, col) == goal:
-                    cell_color = pygame.Color(0, 130, 0)  # Verde claro para a saída
+                    cell_color = pygame.Color(70, 170, 50)  # Verde claro para a saída
                 # Caminho livre com peso (distância para a saída)
                 else:
                     distance = distances[row][col]
@@ -131,12 +132,24 @@ class Interface:
                 square_cell = pygame.Rect(self.maze_left_margin + col*self.cell_size, self.maze_top_margin + row*self.cell_size, self.cell_size, self.cell_size)
                 pygame.draw.rect(self.screen, cell_color, square_cell)
 
+                # Desenha outline preto para parede desconhecida
+                if not known_wall and is_wall((row, col), self.real_maze):
+                    pygame.draw.rect(self.screen, pygame.Color(80, 80, 80), square_cell, width=4)
+
+                # Desenha valor da distância na célula
+                if distances[row][col] != float('inf') and not is_wall((row, col), known_maze):
+                    font_size = self.cell_size // 4
+                    font = pygame.freetype.SysFont(None, font_size)
+                    text_surface, _ = font.render(str(int(distances[row][col])), fgcolor="black")
+                    text_rect = text_surface.get_rect(center=square_cell.center)
+                    self.screen.blit(text_surface, text_rect)
+
         # Desenha mouse (robô)
         self.draw_mouse(pos, direction)
 
         # DEBUG
         self.draw_debug_text(f"Posição: {pos}, Direção: {direction}")
-        self.draw_debug_distances(distances)
+        #self.draw_debug_distances(distances)
 
         # Desenha tela atualizada
         pygame.display.flip()

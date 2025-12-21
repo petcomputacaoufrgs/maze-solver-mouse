@@ -19,13 +19,13 @@ initialization_start_time = 0
 # Labirinto de teste (pode ser gerado futuramente)
 default_maze = [
 [1, 1, 1, 1, 1],
-[1, 0, 0, 1, 1],
+[1, 0, 1, 0, 1],
 [1, 0, 1, 0, 1],
 [1, 0, 0, 0, 1],
 [1, 1, 1, 1, 1]
 ]
 
-big_maze = [
+medium_maze = [
 [1, 0, 0, 0, 1, 0, 0],
 [1, 0, 1, 0, 1, 0, 1],
 [1, 0, 1, 0, 0, 0, 0],
@@ -35,7 +35,7 @@ big_maze = [
 [1, 1, 1, 1, 1, 1, 1]
 ]
 
-big_test_maze = [
+big_maze = [
 [1, 1, 1, 1, 1, 1, 1, 1, 1],
 [1, 0, 0, 0, 1, 0, 0, 0, 1],
 [1, 0, 1, 0, 1, 0, 1, 0, 1],
@@ -47,14 +47,14 @@ big_test_maze = [
 [1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 start = (7, 1)
-goal = (1, 7)
+goal = (7, 7)
 
 known_maze = np.zeros((MAZE_HEIGHT, MAZE_WIDTH))
 pos = start
 direction = 'N'
 
-solver = maze_solver.MazeSolver(big_test_maze, start, goal)
-interface = ui.Interface(MAZE_HEIGHT, MAZE_WIDTH)
+solver = maze_solver.MazeSolver(big_maze, start, goal)
+interface = ui.Interface(MAZE_HEIGHT, MAZE_WIDTH, big_maze)
 
 # Controle de tempo para o solver
 last_solver_update = 0
