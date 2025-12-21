@@ -4,7 +4,7 @@ from enum import Enum
 
 BOT_VISION_BY_SQUARES = 2
 DIRECTIONS = ['N', 'E', 'S', 'W']
-DIR_VECTORS = {'N': (0, 1), 'E': (1, 0), 'S': (0, -1), 'W': (-1, 0)}
+DIR_VECTORS = {'N': (-1, 0), 'E': (0, 1), 'S': (1, 0), 'W': (0, -1)}
 
 # Métodos auxiliares
 def is_wall(pos, maze):

@@ -4,8 +4,8 @@ import maze_solver
 import interface as ui
 
 # Constantes
-MAZE_WIDTH = 5
-MAZE_HEIGHT = 5
+MAZE_WIDTH = 9
+MAZE_HEIGHT = 9
 #RANDOM_GENERATION = False
 
 # Inicilização
@@ -24,19 +24,41 @@ default_maze = [
 [1, 0, 0, 0, 1],
 [1, 1, 1, 1, 1]
 ]
-start = (1, 1)
-goal = (3, 3)
 
-known_maze = np.zeros((MAZE_WIDTH, MAZE_HEIGHT))
+big_maze = [
+[1, 0, 0, 0, 1, 0, 0],
+[1, 0, 1, 0, 1, 0, 1],
+[1, 0, 1, 0, 0, 0, 0],
+[1, 0, 0, 0, 1, 1, 0],
+[1, 1, 1, 0, 0, 0, 0],
+[1, 0, 0, 0, 1, 1, 0],
+[1, 1, 1, 1, 1, 1, 1]
+]
+
+big_test_maze = [
+[1, 1, 1, 1, 1, 1, 1, 1, 1],
+[1, 0, 0, 0, 1, 0, 0, 0, 1],
+[1, 0, 1, 0, 1, 0, 1, 0, 1],
+[1, 0, 1, 0, 1, 0, 1, 0, 1],
+[1, 0, 1, 0, 1, 0, 1, 0, 1],
+[1, 0, 1, 0, 1, 0, 1, 0, 1],
+[1, 0, 1, 0, 1, 0, 1, 0, 1],
+[1, 0, 1, 0, 0, 0, 1, 0, 1],
+[1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
+start = (7, 1)
+goal = (1, 7)
+
+known_maze = np.zeros((MAZE_HEIGHT, MAZE_WIDTH))
 pos = start
 direction = 'N'
 
-solver = maze_solver.MazeSolver(default_maze, start, goal)
-interface = ui.Interface(MAZE_WIDTH, MAZE_HEIGHT)
+solver = maze_solver.MazeSolver(big_test_maze, start, goal)
+interface = ui.Interface(MAZE_HEIGHT, MAZE_WIDTH)
 
 # Controle de tempo para o solver
 last_solver_update = 0
-solver_interval = 500  # 1 segundo em milissegundos
+solver_interval = 1000  # 1 segundo em milissegundos
 initialization_buffer = 100  # 500ms de buffer para garantir que a janela está carregada
 
 # Execução Principal
@@ -46,7 +68,7 @@ previous_dir = direction
 
 # Renderiza o estado inicial antes de começar a simulação já com distâncias do flood fill
 distances = solver.flood_fill(known_maze, goal)
-interface.draw_maze(known_maze, distances, pos, direction)
+interface.draw_maze(known_maze, distances, pos, direction, goal)
 pygame.display.flip()
 initialization_start_time = pygame.time.get_ticks()
 
@@ -66,7 +88,7 @@ while running:
             initialization_complete = True
             last_solver_update = current_time  # Inicializa o contador após o buffer
         # Durante a inicialização, continua renderizando o estado inicial
-        interface.draw_maze(known_maze, distances, pos, direction)
+        interface.draw_maze(known_maze, distances, pos, direction, goal)
         clock.tick(60)
         continue
 
@@ -84,7 +106,7 @@ while running:
                 running = False
 
     # Renderização
-    interface.draw_maze(known_maze, distances, pos, direction)
+    interface.draw_maze(known_maze, distances, pos, direction, goal)
 
     clock.tick(60)  # 60 FPS
 
