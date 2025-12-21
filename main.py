@@ -6,15 +6,18 @@ import interface as ui
 # Constantes
 MAZE_WIDTH = 5
 MAZE_HEIGHT = 5
+#RANDOM_GENERATION = False
 
 # Inicilização
 pygame.init()
 
 clock = pygame.time.Clock()
 running = True
+initialization_complete = False
+initialization_start_time = 0
 
 # Labirinto de teste (pode ser gerado futuramente)
-test_maze = [
+default_maze = [
 [1, 1, 1, 1, 1],
 [1, 0, 0, 1, 1],
 [1, 0, 1, 0, 1],
@@ -24,38 +27,64 @@ test_maze = [
 start = (1, 1)
 goal = (3, 3)
 
-solver = maze_solver.MazeSolver(test_maze, start, goal)
+known_maze = np.zeros((MAZE_WIDTH, MAZE_HEIGHT))
+pos = start
+direction = 'N'
+
+solver = maze_solver.MazeSolver(default_maze, start, goal)
 interface = ui.Interface(MAZE_WIDTH, MAZE_HEIGHT)
 
 # Controle de tempo para o solver
 last_solver_update = 0
-solver_interval = 3000  # 3 segundos em milissegundos
-
-# Queremos mostrar a posição anterior, a em que o robô estava quando calculou as distâncias.
-previous_pos = start 
+solver_interval = 500  # 1 segundo em milissegundos
+initialization_buffer = 100  # 500ms de buffer para garantir que a janela está carregada
 
 # Execução Principal
-# Primeiro passo para inicializar instantaneamente
-known_maze, distances, pos, direction, path = solver.run()
+solver_gen = solver.run()
+previous_pos = start
+previous_dir = direction
+
+# Renderiza o estado inicial antes de começar a simulação já com distâncias do flood fill
+distances = solver.flood_fill(known_maze, goal)
+interface.draw_maze(known_maze, distances, pos, direction)
+pygame.display.flip()
+initialization_start_time = pygame.time.get_ticks()
+
+# Flood fill inicial para já mostrar cores de distância
+#distances = solver.flood_fill(solver.known_maze, solver.goal)
 while running:
     # Verifica eventos
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # Renderização
-    interface.draw_maze(known_maze, distances, previous_pos, direction)
-
-    # Atualiza estado do labirinto e do mouse com próximo passo do solver
     current_time = pygame.time.get_ticks()
     
+    # Aguarda o buffer de inicialização antes de começar a simulação
+    if not initialization_complete:
+        if current_time - initialization_start_time >= initialization_buffer:
+            initialization_complete = True
+            last_solver_update = current_time  # Inicializa o contador após o buffer
+        # Durante a inicialização, continua renderizando o estado inicial
+        interface.draw_maze(known_maze, distances, pos, direction)
+        clock.tick(60)
+        continue
+
+    # Atualiza estado do labirinto e do mouse com próximo passo do solver
     if current_time - last_solver_update >= solver_interval:
-        if pos == goal:
-            previous_pos = pos
-        else:
-            previous_pos = pos # Atualiza posição que será mostrada na próxima iteração
-            known_maze, distances, pos, direction, path = solver.run()
-            last_solver_update = current_time
+        if pos != goal:
+            try:
+                known_maze, distances, pos, direction, path = next(solver_gen)
+                while pos == previous_pos and direction == previous_dir:
+                    known_maze, distances, pos, direction, path = next(solver_gen)
+                previous_pos = pos
+                previous_dir = direction
+                last_solver_update = current_time
+            except StopIteration:
+                running = False
+
+    # Renderização
+    interface.draw_maze(known_maze, distances, pos, direction)
 
     clock.tick(60)  # 60 FPS
 

@@ -4,7 +4,7 @@ from enum import Enum
 
 BOT_VISION_BY_SQUARES = 2
 DIRECTIONS = ['N', 'E', 'S', 'W']
-DIR_VECTORS = {'N': (-1, 0), 'E': (0, 1), 'S': (1, 0), 'W': (0, -1)}
+DIR_VECTORS = {'N': (0, 1), 'E': (1, 0), 'S': (0, -1), 'W': (-1, 0)}
 
 # Métodos auxiliares
 def is_wall(pos, maze):
@@ -137,7 +137,7 @@ class MazeSolver:
 
     # Decide o próximo movimento
     def choose_direction(self, actions, direction, distances):
-        # Vamos olhar para todas as ações possíveis a paritr da posição atual e colocar todas as direções com a menor distância possível em uma lista
+        # Vamos olhar para todas as ações possíveis a partir da posição atual e colocar todas as direções com a menor distância possível em uma lista
         best_dirs = []
         min_dist = float('inf')
 
@@ -183,21 +183,26 @@ class MazeSolver:
 
     # FUNÇÃO PRINCIPAL
     def run(self):
-        if self.pos != self.goal:
+        while self.pos != self.goal:
             self.update_vision(self.real_maze, self.known_maze, self.pos, self.direction)
             actions = self.take_all_possible_actions(self.pos, self.known_maze)
 
             # Se só tem uma direção possível (volta), só volta:
             if len(actions) == 1:
                 self.direction = list(actions.keys())[0]
-
             # Se não, tem que fazer uma escolha. Nesse caso, aplica o flood fill a partir do objetivo para obter as distâncias mínimas até ele
             else:
                 self.distances = self.flood_fill(self.known_maze, self.goal)
+                # Pausa execução aqui para atualizar matriz de distâncias na interface
+                yield self.known_maze, self.distances, self.pos, self.direction, self.path
+                
                 self.direction = self.choose_direction(actions, self.direction, self.distances)
+                # Pausa execução aqui para atualizar rotação na interface
+                yield self.known_maze, self.distances, self.pos, self.direction, self.path
 
             dr, dc = DIR_VECTORS[self.direction]
             self.pos = (self.pos[0] + dr, self.pos[1] + dc)
             self.path.append(self.pos)
-
-        return self.known_maze, self.distances, self.pos, self.direction, self.path
+            # Pausa execução aqui para atualizar movimento na interface
+            yield self.known_maze, self.distances, self.pos, self.direction, self.path
+            
