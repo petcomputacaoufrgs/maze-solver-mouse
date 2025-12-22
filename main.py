@@ -2,11 +2,11 @@ import pygame
 import numpy as np
 import maze_solver
 import interface as ui
+import maze_generator as maze_gen
 
 # Constantes
-MAZE_WIDTH = 9
-MAZE_HEIGHT = 9
-#RANDOM_GENERATION = False
+MAZE_WIDTH = 15
+MAZE_HEIGHT = 15
 
 # Inicilização
 pygame.init()
@@ -16,50 +16,17 @@ running = True
 initialization_complete = False
 initialization_start_time = 0
 
-# Labirinto de teste (pode ser gerado futuramente)
-default_maze = [
-[1, 1, 1, 1, 1],
-[1, 0, 1, 0, 1],
-[1, 0, 1, 0, 1],
-[1, 0, 0, 0, 1],
-[1, 1, 1, 1, 1]
-]
-
-medium_maze = [
-[1, 0, 0, 0, 1, 0, 0],
-[1, 0, 1, 0, 1, 0, 1],
-[1, 0, 1, 0, 0, 0, 0],
-[1, 0, 0, 0, 1, 1, 0],
-[1, 1, 1, 0, 0, 0, 0],
-[1, 0, 0, 0, 1, 1, 0],
-[1, 1, 1, 1, 1, 1, 1]
-]
-
-big_maze = [
-[1, 1, 1, 1, 1, 1, 1, 1, 1],
-[1, 0, 0, 0, 1, 0, 0, 0, 1],
-[1, 0, 1, 0, 1, 0, 1, 0, 1],
-[1, 0, 1, 0, 1, 0, 1, 0, 1],
-[1, 0, 1, 0, 1, 0, 1, 0, 1],
-[1, 0, 1, 0, 1, 0, 1, 0, 1],
-[1, 0, 1, 0, 1, 0, 1, 0, 1],
-[1, 0, 1, 0, 0, 0, 1, 0, 1],
-[1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
-start = (7, 1)
-goal = (7, 7)
-
 known_maze = np.zeros((MAZE_HEIGHT, MAZE_WIDTH))
+real_maze, start, goal = maze_gen.generate_maze(MAZE_HEIGHT, MAZE_WIDTH)
 pos = start
 direction = 'N'
-
-solver = maze_solver.MazeSolver(big_maze, start, goal)
-interface = ui.Interface(MAZE_HEIGHT, MAZE_WIDTH, big_maze)
+solver = maze_solver.MazeSolver(real_maze, start, goal)
+interface = ui.Interface(MAZE_HEIGHT, MAZE_WIDTH, real_maze)
 
 # Controle de tempo para o solver
 last_solver_update = 0
-solver_interval = 1000  # 1 segundo em milissegundos
-initialization_buffer = 100  # 500ms de buffer para garantir que a janela está carregada
+solver_interval = 250  # 250 milissegundos
+initialization_buffer = 100  # 100ms de buffer para garantir que a janela está carregada
 
 # Execução Principal
 solver_gen = solver.run()
