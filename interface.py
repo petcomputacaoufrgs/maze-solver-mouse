@@ -13,8 +13,31 @@ class Interface:
     def __init__(self, maze_height, maze_width , real_maze):
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+        maze_coverage = 0.8
+        font_coverage = 0.25
+        self.cell_border = 4
+        self.draw_num = True
+        # Adapta escala para quando o labirinto é muito grande
+        biggest_maze_axis = max(maze_width, maze_height)
+        if (biggest_maze_axis > 20):
+            maze_coverage = 1
+            font_coverage += (biggest_maze_axis - 15) * 0.01
+            if (biggest_maze_axis > 30):
+                self.cell_border = 2
+                if (biggest_maze_axis > 40):
+                    self.draw_num = False
+
         # Calcula tamanho da célula baseado no tamanho do labirinto e da tela
-        self.cell_size = min(SCREEN_WIDTH * 0.8 // maze_width, SCREEN_HEIGHT * 0.8 // maze_height)
+        self.cell_size = min(SCREEN_WIDTH * maze_coverage // maze_width, SCREEN_HEIGHT * maze_coverage // maze_height)
+
+        # Cria fonte de números
+        font_size = int(self.cell_size * font_coverage)
+        self.num_font = pygame.freetype.SysFont(None, font_size)
+        # Cache de números pré-renderizados (otimização)
+        self.cached_numbers = {}
+        for i in range(max(maze_height, maze_width) * 2):
+            text_surface, _ = self.num_font.render(str(i), fgcolor="black")
+            self.cached_numbers[i] = text_surface
 
         # Carrega e escala a imagem do mouse
         self.mouse_image = pygame.transform.smoothscale(pygame.image.load('assets/mouse.png'), (self.cell_size*0.8, self.cell_size*0.8))
@@ -23,8 +46,7 @@ class Interface:
         self.maze_width = maze_width
         self.maze_height = maze_height
         maze_size = (maze_width * self.cell_size, maze_height * self.cell_size)
-        self.maze_left_margin = (SCREEN_WIDTH - maze_size[0]) // 2 # Centraliza horizontalmente
-        # Centraliza verticalmente (topo do labirinto)
+        self.maze_left_margin = (SCREEN_WIDTH - maze_size[0]) // 2
         self.maze_top_margin = (SCREEN_HEIGHT - maze_size[1]) // 2
 
     def draw_debug_text(self, text, font_size=20, y_pos=10, color="black"):
@@ -58,6 +80,7 @@ class Interface:
                 else:
                     text_surface, _ = font.render(str(int(distances[row][column])), fgcolor=color)
                 self.screen.blit(text_surface, (position[0] + column * font_size * 1.5, position[1] + row * font_size * 1.5))
+
     def draw_mouse(self, pos, direction):
         # Rotaciona imagem de acordo com direção
         # Pygame rotaciona no sentido anti-horário e a imagem começa apontando para o norte
@@ -88,7 +111,7 @@ class Interface:
         c_red    = pygame.Color(255, 50, 50)   # Perto (Vermelho)
         c_yellow = pygame.Color(255, 255, 100) # Médio-Perto (Amarelo claro)
         c_white  = pygame.Color(200, 200, 200) # Centro (Neutro/Cinza)
-        c_blue   = pygame.Color(30, 30, 150)   # Longe (Azul Escuro)
+        c_blue   = pygame.Color(75, 75, 245)   # Longe (Azul Escuro)
         if t < 0.33:
             # 0% a 33%: Vermelho -> Amarelo
             return c_red.lerp(c_yellow, t / 0.33)
@@ -120,13 +143,12 @@ class Interface:
                     cell_color = pygame.Color(0, 0, 0)  # Preto para paredes
                 elif (row, col) == goal:
                     cell_color = pygame.Color(70, 170, 50)  # Verde claro para a saída
-                # Caminho livre com peso (distância para a saída)
                 else:
-                    distance = distances[row][col]
-                    if distance == float('inf'):
-                        cell_color = pygame.Color(230, 230, 230)  # Cinza claro para células não alcançáveis
+                    cell_dist = distances[row][col]
+                    if cell_dist == float('inf'):
+                        cell_color = pygame.Color(80, 80, 80)  # Cinza para célula inalcansável
                     else:
-                        cell_color = self.get_heatmap_color(distance, max_distance)
+                        cell_color = self.get_heatmap_color(cell_dist, max_distance) # Caminho livre
 
                 # Desenha célula, Rect(left, top, width, height) -> Retângulo.
                 square_cell = pygame.Rect(self.maze_left_margin + col*self.cell_size, self.maze_top_margin + row*self.cell_size, self.cell_size, self.cell_size)
@@ -134,21 +156,23 @@ class Interface:
 
                 # Desenha outline preto para parede desconhecida
                 if not known_wall and is_wall((row, col), self.real_maze):
-                    pygame.draw.rect(self.screen, pygame.Color(80, 80, 80), square_cell, width=4)
+                    pygame.draw.rect(self.screen, pygame.Color(80, 80, 80), square_cell, width=self.cell_border)
 
                 # Desenha valor da distância na célula
-                if distances[row][col] != float('inf') and not is_wall((row, col), known_maze):
-                    font_size = self.cell_size // 4
-                    font = pygame.freetype.SysFont(None, font_size)
-                    text_surface, _ = font.render(str(int(distances[row][col])), fgcolor="black")
-                    text_rect = text_surface.get_rect(center=square_cell.center)
-                    self.screen.blit(text_surface, text_rect)
+                if self.draw_num:
+                    cell_dist = distances[row][col]
+                    if distances[row][col] != float('inf') and not is_wall((row, col), known_maze):
+                        text_surface = self.cached_numbers.get(cell_dist)
+                        if text_surface is None:  # Fallback para números fora do cache
+                            text_surface, _ = self.num_font.render(str(cell_dist), fgcolor="black")
+                        text_rect = text_surface.get_rect(center=square_cell.center)
+                        self.screen.blit(text_surface, text_rect)
 
         # Desenha mouse (robô)
         self.draw_mouse(pos, direction)
 
         # DEBUG
-        self.draw_debug_text(f"Posição: {pos}, Direção: {direction}")
+        #self.draw_debug_text(f"Posição: {pos}, Direção: {direction}")
         #self.draw_debug_distances(distances)
 
         # Desenha tela atualizada

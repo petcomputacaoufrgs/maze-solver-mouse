@@ -5,8 +5,13 @@ import interface as ui
 import maze_generator as maze_gen
 
 # Constantes
-MAZE_WIDTH = 15
-MAZE_HEIGHT = 15
+MAZE_WIDTH = 25
+MAZE_HEIGHT = 25
+
+# max 0.25 - 21
+# max 0.3 - 25
+# max 0.35 - 31
+# max 0.4 - 35
 
 # Inicilização
 pygame.init()
@@ -25,7 +30,7 @@ interface = ui.Interface(MAZE_HEIGHT, MAZE_WIDTH, real_maze)
 
 # Controle de tempo para o solver
 last_solver_update = 0
-solver_interval = 250  # 250 milissegundos
+solver_interval = 100
 initialization_buffer = 100  # 100ms de buffer para garantir que a janela está carregada
 
 # Execução Principal

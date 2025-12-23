@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import time
 from enum import Enum
 
 class Direction(Enum):
@@ -17,8 +18,8 @@ def list_jump_spaces(maze, pos):
         jump_pos = (pos[0] + row_move*2, pos[1] + column_move*2)
         
         # Adiciona para lista se estiver dentro dos limites e não for parede
-        inside_height = jump_pos[0] > 0 and jump_pos[0] < len(maze)
-        inside_width = jump_pos[1] > 0 and jump_pos[1] < len(maze[0])
+        inside_height = jump_pos[0] >= 0 and jump_pos[0] < len(maze)
+        inside_width = jump_pos[1] >= 0 and jump_pos[1] < len(maze[0])
         if inside_height and inside_width:
             if maze[jump_pos[0], jump_pos[1]] != 1:
                 available_spaces.append((jump_pos, move_dir))
@@ -52,12 +53,12 @@ def generate_maze(height, width, iterations = -1, seed = -1):
 
     # Inicializa gerador de números aleatórios com semente para reprodutibilidade
     if seed == -1:
-        seed = random.randint(0, 10000)  # Inicializa gerador de números aleatórios
+        seed = int(time.time())  # Inicializa gerador de números aleatórios
     random.seed(seed)
 
     # Heurística de iterações para labirinto diferente o suficiente do original
     if iterations == -1:
-        iterations = width * height * 100
+        iterations = width * height * 10
     
     # Cria labirinto inicial ideal
     maze = np.zeros((height, width))
@@ -79,6 +80,8 @@ def generate_maze(height, width, iterations = -1, seed = -1):
         # Escolhe próxima posição para "pular"
         available_spaces = list_jump_spaces(maze, pos)
         if len(available_spaces) > 0:
+
+            # Escolhe pulo disponível aleatório
             new_pos_index = random.randint(0, len(available_spaces) - 1)
             (new_pos, move_dir) = available_spaces[new_pos_index]
 
@@ -104,7 +107,7 @@ def generate_maze(height, width, iterations = -1, seed = -1):
         else:
             break
     
-    # Define entrada e saída para que fiquem distantes
+    # Define entrada e saída para que fiquem descentemente distantes
     goal = pos
     startRow = 1
     startColumn = 1
