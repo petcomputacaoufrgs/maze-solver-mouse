@@ -21,6 +21,11 @@ class MazeSolver:
         self.pos = start
         self.direction = 'N'
         self.path = [self.pos]
+
+    def restart_robot(self):
+        self.pos = self.start
+        self.direction = 'N'
+        self.path = [self.pos]
         
     def turn_left(self, dir): return DIRECTIONS[(DIRECTIONS.index(dir) - 1) % 4]
     def turn_right(self, dir): return DIRECTIONS[(DIRECTIONS.index(dir) + 1) % 4]
@@ -194,15 +199,14 @@ class MazeSolver:
             else:
                 self.distances = self.flood_fill(self.known_maze, self.goal)
                 # Pausa execução aqui para atualizar matriz de distâncias na interface
-                yield self.known_maze, self.distances, self.pos, self.direction, self.path
+                yield self.known_maze, self.distances, self.pos, self.direction, False
                 
                 self.direction = self.choose_direction(actions, self.direction, self.distances)
                 # Pausa execução aqui para atualizar rotação na interface
-                yield self.known_maze, self.distances, self.pos, self.direction, self.path
-
+                yield self.known_maze, self.distances, self.pos, self.direction, True
             dr, dc = DIR_VECTORS[self.direction]
             self.pos = (self.pos[0] + dr, self.pos[1] + dc)
             self.path.append(self.pos)
             # Pausa execução aqui para atualizar movimento na interface
-            yield self.known_maze, self.distances, self.pos, self.direction, self.path
+            yield self.known_maze, self.distances, self.pos, self.direction, True
             

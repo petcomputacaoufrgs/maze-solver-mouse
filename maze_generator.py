@@ -121,9 +121,6 @@ def generate_maze(height, width, iterations = -1, seed = -1):
     else:
         startColumn = width - 1
 
-    print("Start Position:", (startRow, startColumn))
-    print("Goal Position:", goal)
-
     # Limpa labirinto (remove direções, deixa só paredes e caminhos livres)
     for row in range(height):
         for column in range(width):
