@@ -98,3 +98,68 @@ class Slider:
             # Converte posição x em valor
             pos_ratio = (new_x - self.rect.left) / self.rect.width
             self.value = self.min_val + pos_ratio * (self.max_val - self.min_val)
+
+class InputBox:
+    def __init__(self, x, y, width, height, label="Seed:", initial_text=""):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color_inactive = pygame.Color('lightskyblue3')
+        self.color_active = pygame.Color('dodgerblue2')
+        self.color = self.color_inactive
+        self.text = initial_text
+        self.label = label
+        self.font = pygame.font.SysFont(None, 32)
+        self.txt_surface = self.font.render(initial_text, True, (0, 0, 0))
+        self.active = False
+        self.first_click = False  # Flag para limpar texto no primeiro clique
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # Se o usuário clicar na caixa, ela fica ativa
+            if self.rect.collidepoint(event.pos):
+                was_inactive = not self.active
+                self.active = True
+                # Se estava inativo e foi clicado, marcar para limpar na primeira tecla
+                if was_inactive:
+                    self.first_click = True
+            else:
+                self.active = False
+                self.first_click = False
+            self.color = self.color_active if self.active else self.color_inactive
+            
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    self.first_click = False
+                    return self.text  # Retorna o texto ao apertar Enter
+                elif event.key == pygame.K_BACKSPACE:
+                    if self.first_click:
+                        # Se é o primeiro input, limpa tudo
+                        self.text = ""
+                        self.first_click = False
+                    else:
+                        self.text = self.text[:-1]
+                else:
+                    # Se é o primeiro input após clicar, substitui o texto
+                    if self.first_click and event.unicode.isdigit():
+                        self.text = ""
+                        self.first_click = False
+                    # Aceita apenas números e limita a 6 dígitos
+                    if event.unicode.isdigit() and len(self.text) < 6:
+                        self.text += event.unicode
+                
+                # Re-renderiza o texto
+                self.txt_surface = self.font.render(self.text, True, (0, 0, 0))
+        return None
+
+    def draw(self, screen):
+        # Desenha o Label acima da caixa
+        if self.label:
+            label_surf = self.font.render(self.label, True, (0, 0, 0))
+            screen.blit(label_surf, (self.rect.x, self.rect.y - 20))
+        
+        # Desenha o texto centralizado dentro da caixa
+        text_rect = self.txt_surface.get_rect(center=self.rect.center)
+        screen.blit(self.txt_surface, text_rect)
+        
+        # Desenha a borda da caixa
+        pygame.draw.rect(screen, self.color, self.rect, 2)

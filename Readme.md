@@ -32,3 +32,7 @@
 
 - *1: depende das informações que vamos fornecer para o robô. Se fornecermos só a saída, vai ser isso mesmo. 
 - Fornecendo a entrada também, o labirinto conhecido pode inicializar da posição (0, 0) até (maxRow(entrada, saida), maxCol(entrada, saída)) 
+
+-----
+# Labirintos interessantes
+seed: 346967 L x A: (71 x 55) -> Muita exploração desnecessária

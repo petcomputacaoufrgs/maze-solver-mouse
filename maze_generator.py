@@ -1,6 +1,5 @@
 import numpy as np
 import random
-import time
 from enum import Enum
 
 class Direction(Enum):
@@ -11,49 +10,11 @@ class Direction(Enum):
 
 move_vectors = {Direction.UP: (-1, 0), Direction.RIGHT: (0, 1), Direction.DOWN: (1, 0), Direction.LEFT: (0, -1)}
 
-# Cria listas de posições vizinhas com um espaço entre elas para orgiem "pular" para uma delas
-def list_jump_spaces(maze, pos):
-    available_spaces = [] # (pos, move_dir)
-    for move_dir, (row_move, column_move) in move_vectors.items():
-        jump_pos = (pos[0] + row_move*2, pos[1] + column_move*2)
-        
-        # Adiciona para lista se estiver dentro dos limites e não for parede
-        inside_height = jump_pos[0] >= 0 and jump_pos[0] < len(maze)
-        inside_width = jump_pos[1] >= 0 and jump_pos[1] < len(maze[0])
-        if inside_height and inside_width:
-            if maze[jump_pos[0], jump_pos[1]] != 1:
-                available_spaces.append((jump_pos, move_dir))
-    return available_spaces
-
-def debug_print_maze(maze, pos, height, width):
-    # Imprime labirinto gerado no console
-        for row in range(height):
-            for column in range(width):
-                if pos == (row, column):
-                    print("X", end=" ")
-                elif maze[row, column] == 1:
-                    print("\u25FB", end=" ")
-                else:
-                    match (maze[row, column]):
-                        case Direction.UP.value:
-                            print("^", end=" ")
-                        case Direction.RIGHT.value:
-                            print(">", end=" ")
-                        case Direction.DOWN.value:
-                            print("v", end=" ")
-                        case Direction.LEFT.value:
-                            print("<", end=" ")
-            print()
-        print("\n========================================\n")
-
 # Origin Shift: Algoritmo de geração de labirintos ideais (sem loops e áreas inacessíveis)
-def generate_maze(height, width, iterations = -1, seed = -1):
+def generate_maze(height, width, iterations = -1, seed=12345):
     if width % 2 == 0 or height % 2 == 0:
         raise Exception(" Labirinto deve ter dimensões ímpares.")
 
-    # Inicializa gerador de números aleatórios com semente para reprodutibilidade
-    if seed == -1:
-        seed = int(time.time())  # Inicializa gerador de números aleatórios
     random.seed(seed)
 
     # Heurística de iterações para labirinto diferente o suficiente do original
@@ -129,7 +90,36 @@ def generate_maze(height, width, iterations = -1, seed = -1):
     
     return maze, (startRow, startColumn), goal
 
+# Cria listas de posições vizinhas com um espaço entre elas para orgiem "pular" para uma delas
+def list_jump_spaces(maze, pos):
+    available_spaces = [] # (pos, move_dir)
+    for move_dir, (row_move, column_move) in move_vectors.items():
+        jump_pos = (pos[0] + row_move*2, pos[1] + column_move*2)
+        
+        # Adiciona para lista se estiver dentro dos limites e não for parede
+        inside_height = jump_pos[0] >= 0 and jump_pos[0] < len(maze)
+        inside_width = jump_pos[1] >= 0 and jump_pos[1] < len(maze[0])
+        if inside_height and inside_width:
+            if maze[jump_pos[0], jump_pos[1]] != 1:
+                available_spaces.append((jump_pos, move_dir))
+    return available_spaces
 
-
-
-
+def debug_print_maze(maze, pos, height, width):
+    # Imprime labirinto gerado no console
+        for row in range(height):
+            for column in range(width):
+                if pos == (row, column):
+                    print("X", end=" ")
+                elif maze[row, column] == 1:
+                    print("\u25FB", end=" ")
+                else:
+                    match (maze[row, column]):
+                        case Direction.UP.value:
+                            print("^", end=" ")
+                        case Direction.RIGHT.value:
+                            print(">", end=" ")
+                        case Direction.DOWN.value:
+                            print("v", end=" ")
+                        case Direction.LEFT.value:
+                            print("<", end=" ")
+            print()

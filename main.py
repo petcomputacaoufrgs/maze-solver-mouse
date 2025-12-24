@@ -19,8 +19,6 @@ interface = interface.Interface(MAZE_HEIGHT, MAZE_WIDTH, sim)
 interface.draw_scene(sim.known_maze, sim.distances, sim.pos, sim.direction, sim.start, sim.goal)
 pygame.display.flip()
 
-# Flood fill inicial para já mostrar cores de distância
-#distances = solver.flood_fill(solver.known_maze, solver.goal)
 screen_open = True
 while screen_open:
     # Verifica eventos

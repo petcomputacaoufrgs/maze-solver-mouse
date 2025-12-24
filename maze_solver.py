@@ -199,14 +199,14 @@ class MazeSolver:
             else:
                 self.distances = self.flood_fill(self.known_maze, self.goal)
                 # Pausa execução aqui para atualizar matriz de distâncias na interface
-                yield self.known_maze, self.distances, self.pos, self.direction, False
+                yield self.known_maze, self.distances, self.pos, self.direction, "distance_update"
                 
                 self.direction = self.choose_direction(actions, self.direction, self.distances)
                 # Pausa execução aqui para atualizar rotação na interface
-                yield self.known_maze, self.distances, self.pos, self.direction, True
+                yield self.known_maze, self.distances, self.pos, self.direction, "direction_update"
             dr, dc = DIR_VECTORS[self.direction]
             self.pos = (self.pos[0] + dr, self.pos[1] + dc)
             self.path.append(self.pos)
             # Pausa execução aqui para atualizar movimento na interface
-            yield self.known_maze, self.distances, self.pos, self.direction, True
+            yield self.known_maze, self.distances, self.pos, self.direction, "movement_update"
             
