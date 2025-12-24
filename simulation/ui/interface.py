@@ -42,6 +42,7 @@ class Interface:
         self.pause_icon = pygame.image.load('assets/pause_btn.png')
         self.reset_icon = pygame.image.load('assets/reset_btn.png')
         self.restart_icon = pygame.image.load('assets/restart_btn.png')
+        self.rand_seed_icon = pygame.image.load('assets/rand_seed_btn.png')
 
     def _create_control_buttons(self):
         """Create control buttons (restart, reset, play/pause) and speed slider"""
@@ -94,25 +95,28 @@ class Interface:
             size_inputs_y, UILayout.SIZE_INPUT_WIDTH, 30, "", str(maze_height)
         )
         
+        # Botão de seed aleatória
+        self.btn_random_seed = ui.IconButton(
+            UILayout.UI_LEFT_MARGIN, 
+            maze_gen_y, UILayout.ICON_BTN_SIZE, UILayout.BTN_HEIGHT,
+            self.rand_seed_icon, self.rand_seed_icon, 
+            Theme.BTN_GREEN, Theme.hover_col(Theme.BTN_GREEN), 
+            self.randomize_seed, initial_state=False
+        )
+        
+        # Botão Gerar
         self.btn_new_maze = ui.Button(
-            UILayout.UI_LEFT_MARGIN, maze_gen_y, 
+            UILayout.UI_LEFT_MARGIN + UILayout.ICON_BTN_SIZE + UILayout.SPACING, maze_gen_y, 
             UILayout.SMALL_BTN_WIDTH, UILayout.BTN_HEIGHT, 
             "Gerar", Theme.BTN_RED, Theme.hover_col(Theme.BTN_RED), 
             self.new_maze
         )
         
+        # Campo de seed
         self.seed_input = ui.InputBox(
-            UILayout.UI_LEFT_MARGIN + UILayout.SMALL_BTN_WIDTH + UILayout.SPACING, 
+            UILayout.UI_LEFT_MARGIN + UILayout.ICON_BTN_SIZE + UILayout.SPACING + UILayout.SMALL_BTN_WIDTH + UILayout.SPACING, 
             maze_gen_y, UILayout.SEED_INPUT_WIDTH, UILayout.BTN_HEIGHT, 
             "", str(self.sim.maze_seed)
-        )
-        
-        self.btn_random_seed = ui.IconButton(
-            UILayout.UI_LEFT_MARGIN + UILayout.SMALL_BTN_WIDTH + UILayout.SPACING + UILayout.SEED_INPUT_WIDTH + UILayout.SPACING, 
-            maze_gen_y, UILayout.ICON_BTN_SIZE, UILayout.BTN_HEIGHT,
-            self.restart_icon, self.restart_icon, 
-            Theme.BTN_GREEN, Theme.hover_col(Theme.BTN_GREEN), 
-            self.randomize_seed, initial_state=False
         )
 
     def _initialize_ui_elements(self):

@@ -1,6 +1,6 @@
 import pygame
-import interface
-import simulation
+import simulation.ui.interface as interface
+import simulation.simulation as simulation
 
 # Constantes
 MAZE_WIDTH = 21

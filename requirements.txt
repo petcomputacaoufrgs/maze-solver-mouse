@@ -1,0 +1,11 @@
+# Mico-Leão - Maze Solver Mouse
+# Dependências do projeto para robô solucionador de labirinto
+
+# Biblioteca principal para visualização e interface gráfica
+pygame>=2.5.0
+
+# Possíveis dependências futuras para o robô físico:
+# pyserial>=3.5        # Comunicação serial com microcontroladores
+# RPi.GPIO>=0.7.1      # Controle de GPIO no Raspberry Pi (apenas Linux)
+# adafruit-circuitpython-motor>=3.4.0  # Controle de motores
+# numpy>=1.24.0        # Cálculos numéricos e processamento

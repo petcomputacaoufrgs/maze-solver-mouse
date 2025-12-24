@@ -1,9 +1,8 @@
-from random import random
 import random as rand
 import pygame
 import numpy as np
 import maze_solver
-import maze_generator as maze_gen
+import simulation.maze_generator as maze_gen
 
 class Simulation:
     def __init__(self, maze_height=51, maze_width=51):
